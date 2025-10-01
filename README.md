@@ -6,11 +6,12 @@ En genbrugelig Vue 3 komponent til at vælge og erstatte billeder fra Unsplash. 
 
 - 🖼️ Interaktiv billedskifter med hover-overlay
 - 🔍 Debounced Unsplash-søgning (300ms)
-- 🏷️ Hurtigsøgning med chips (Food, Sport, Animals)
+- 🏷️ Configurable search tags fra JSON (eller via props)
 - ♿ Fuldt tilgængelig (ARIA, keyboard navigation, focus management)
 - 🎨 Pixel-perfekt UI med smooth transitions
 - 🔐 OAuth PKCE support til højere rate limits
 - 🎭 Dummy mode til UI-demo uden API-nøgle
+- 📝 v-model support for reaktiv billedskift
 
 ## 🚀 Quickstart
 
@@ -64,14 +65,14 @@ npm run dev
 
 #### **OAuth Mode** (højere rate limits)
 
-1. I din Unsplash app-indstillinger, tilføj callback URL: `http://localhost:5173/auth/callback`
+1. I din Unsplash app-indstillinger, tilføj callback URL: `http://localhost:3000/auth/callback`
 2. Opdater `.env`:
 
 ```env
 VITE_APP_DUMMY_MODE=false
 VITE_UNSPLASH_ACCESS_KEY=din_access_key_her
 VITE_UNSPLASH_OAUTH_ENABLED=true
-VITE_UNSPLASH_REDIRECT_URI=http://localhost:5173/auth/callback
+VITE_UNSPLASH_REDIRECT_URI=http://localhost:3000/auth/callback
 ```
 
 Kør appen og klik "Login with Unsplash".
@@ -103,7 +104,25 @@ Unsplash's token exchange endpoint har CORS-restriktioner. Fuld OAuth-implemente
 interface Props {
   modelValue: string      // Billede-URL (v-model)
   placeholder?: string    // Fallback URL (default: Unsplash sample)
+  tags?: string[]         // Custom search tags (default: fra src/config/search-tags.json)
 }
+```
+
+### Search Tags Configuration
+
+Search tags kan konfigureres på to måder:
+
+**1. Via config fil (default):**
+Rediger `src/config/search-tags.json`:
+```json
+{
+  "tags": ["Food", "Sport", "Animals", "Nature", "Technology", "Travel", "Architecture", "People"]
+}
+```
+
+**2. Via props (override):**
+```vue
+<ImageReplacer v-model="imageSrc" :tags="['Cats', 'Dogs', 'Birds']" />
 ```
 
 ### Events
