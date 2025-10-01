@@ -1,17 +1,17 @@
 # Unsplash Image Replacer
 
-En genbrugelig Vue 3 komponent til at vælge og erstatte billeder fra Unsplash. Bygget med Vite, TypeScript og ren CSS.
+A reusable Vue 3 component for selecting and replacing images from Unsplash. Built with Vite, TypeScript, and vanilla CSS.
 
 ## ✨ Features
 
-- 🖼️ Interaktiv billedskifter med hover-overlay
-- 🔍 Debounced Unsplash-søgning (300ms)
-- 🏷️ Configurable search tags fra JSON (eller via props)
-- ♿ Fuldt tilgængelig (ARIA, keyboard navigation, focus management)
-- 🎨 Pixel-perfekt UI med smooth transitions
-- 🔐 OAuth PKCE support til højere rate limits
-- 🎭 Dummy mode til UI-demo uden API-nøgle
-- 📝 v-model support for reaktiv billedskift
+- 🖼️ Interactive image replacer with hover overlay
+- 🔍 Debounced Unsplash search (300ms)
+- 🏷️ Configurable search tags from JSON (or via props)
+- ♿ Fully accessible (ARIA, keyboard navigation, focus management)
+- 🎨 Pixel-perfect UI with smooth transitions
+- 🔐 OAuth PKCE support for higher rate limits
+- 🎭 Dummy mode for UI demo without API key
+- 📝 v-model support for reactive image switching
 
 ## 🚀 Quickstart
 
@@ -21,71 +21,71 @@ En genbrugelig Vue 3 komponent til at vælge og erstatte billeder fra Unsplash. 
 npm install
 ```
 
-### 2. Konfiguration
+### 2. Configuration
 
-Kopiér `.env.example` til `.env`:
+Copy `.env.example` to `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-### 3. Vælg mode
+### 3. Choose Mode
 
-#### **Dummy Mode** (ingen API-nøgle krævet)
+#### **Dummy Mode** (no API key required)
 
 ```env
 VITE_APP_DUMMY_MODE=true
 ```
 
-Kør appen:
+Run the app:
 
 ```bash
 npm run dev
 ```
 
-Dummy mode bruger mock data og kræver ingen Unsplash-konto. Perfekt til UI-udvikling og demo.
+Dummy mode uses mock data and requires no Unsplash account. Perfect for UI development and demos.
 
-#### **Live Mode** (kræver Unsplash Access Key)
+#### **Live Mode** (requires Unsplash Access Key)
 
-1. Opret en Unsplash Developer-konto på [https://unsplash.com/developers](https://unsplash.com/developers)
-2. Opret en ny app og få din **Access Key**
-3. Opdater `.env`:
+1. Create an Unsplash Developer account at [https://unsplash.com/developers](https://unsplash.com/developers)
+2. Create a new app and get your **Access Key**
+3. Update `.env`:
 
 ```env
 VITE_APP_DUMMY_MODE=false
-VITE_UNSPLASH_ACCESS_KEY=din_access_key_her
+VITE_UNSPLASH_ACCESS_KEY=your_access_key_here
 VITE_UNSPLASH_OAUTH_ENABLED=false
 ```
 
-Kør appen:
+Run the app:
 
 ```bash
 npm run dev
 ```
 
-#### **OAuth Mode** (højere rate limits)
+#### **OAuth Mode** (higher rate limits)
 
-1. I din Unsplash app-indstillinger, tilføj callback URL: `http://localhost:3000/auth/callback`
-2. Opdater `.env`:
+1. In your Unsplash app settings, add callback URL: `http://localhost:3000/auth/callback`
+2. Update `.env`:
 
 ```env
 VITE_APP_DUMMY_MODE=false
-VITE_UNSPLASH_ACCESS_KEY=din_access_key_her
+VITE_UNSPLASH_ACCESS_KEY=your_access_key_here
 VITE_UNSPLASH_OAUTH_ENABLED=true
 VITE_UNSPLASH_REDIRECT_URI=http://localhost:3000/auth/callback
 ```
 
-Kør appen og klik "Login with Unsplash".
+Run the app and click "Login with Unsplash".
 
-**⚠️ OAuth Begrænsning:**
-Unsplash's token exchange endpoint har CORS-restriktioner. Fuld OAuth-implementering kræver en backend til at bytte authorization code til access token. Se "OAuth Backend Setup" nedenfor.
+**⚠️ OAuth Limitation:**
+Unsplash's token exchange endpoint has CORS restrictions. Full OAuth implementation requires a backend to exchange authorization code for access token. See "OAuth Backend Setup" below.
 
-## 📁 Filstruktur
+## 📁 File Structure
 
 ```
 /src
   /components
-    ImageReplacer.vue     # Hovedkomponent
+    ImageReplacer.vue     # Main component
   /lib
     unsplash.ts           # Unsplash API wrapper
     debounce.ts           # Debounce utility
@@ -96,24 +96,24 @@ Unsplash's token exchange endpoint har CORS-restriktioner. Fuld OAuth-implemente
   style.css
 ```
 
-## 🔧 Komponent API
+## 🔧 Component API
 
 ### Props
 
 ```typescript
 interface Props {
-  modelValue: string      // Billede-URL (v-model)
+  modelValue: string      // Image URL (v-model)
   placeholder?: string    // Fallback URL (default: Unsplash sample)
-  tags?: string[]         // Custom search tags (default: fra src/config/search-tags.json)
+  tags?: string[]         // Custom search tags (default: from src/config/search-tags.json)
 }
 ```
 
 ### Search Tags Configuration
 
-Search tags kan konfigureres på to måder:
+Search tags can be configured in two ways:
 
-**1. Via config fil (default):**
-Rediger `src/config/search-tags.json`:
+**1. Via config file (default):**
+Edit `src/config/search-tags.json`:
 ```json
 {
   "tags": ["Food", "Sport", "Animals", "Nature", "Technology", "Travel", "Architecture", "People"]
@@ -128,11 +128,11 @@ Rediger `src/config/search-tags.json`:
 ### Events
 
 ```typescript
-// Emitter nyt billede-URL
+// Emits new image URL
 emit('update:modelValue', url: string)
 ```
 
-### Brug i dit projekt
+### Usage in Your Project
 
 ```vue
 <script setup>
@@ -147,13 +147,13 @@ const imageSrc = ref('https://images.unsplash.com/photo-1638368593249-7cadb261e8
 </template>
 ```
 
-## 🎯 Kopiér til Nuxt
+## 🎯 Copy to Nuxt
 
-Komponenten er bygget framework-agnostisk og kan nemt kopieres til Nuxt:
+The component is built framework-agnostic and can easily be copied to Nuxt:
 
-1. **Kopiér filer:**
+1. **Copy files:**
    ```bash
-   # Fra Vue/Vite projekt til Nuxt
+   # From Vue/Vite project to Nuxt
    cp src/components/ImageReplacer.vue <nuxt>/components/
    cp src/lib/unsplash.ts <nuxt>/lib/
    cp src/lib/debounce.ts <nuxt>/lib/
@@ -165,11 +165,11 @@ Komponenten er bygget framework-agnostisk og kan nemt kopieres til Nuxt:
    npm install unsplash-js
    ```
 
-3. **Opdater imports i Nuxt:**
-   - Brug `~/lib/unsplash` i stedet for relative paths
-   - Tilføj Unsplash env-vars til `.env` (samme format)
+3. **Update imports in Nuxt:**
+   - Use `~/lib/unsplash` instead of relative paths
+   - Add Unsplash env vars to `.env` (same format)
 
-4. **Brug i Nuxt pages/components:**
+4. **Use in Nuxt pages/components:**
    ```vue
    <script setup>
    const imageSrc = ref('...')
@@ -180,7 +180,7 @@ Komponenten er bygget framework-agnostisk og kan nemt kopieres til Nuxt:
    </template>
    ```
 
-5. **Client-side only (hvis nødvendigt):**
+5. **Client-side only (if needed):**
    ```vue
    <ClientOnly>
      <ImageReplacer v-model="imageSrc" />
@@ -189,9 +189,9 @@ Komponenten er bygget framework-agnostisk og kan nemt kopieres til Nuxt:
 
 ## 🔐 OAuth Backend Setup
 
-Unsplash's token exchange kræver normalt en backend pga. CORS. Her er en minimal Node.js endpoint:
+Unsplash's token exchange typically requires a backend due to CORS. Here's a minimal Node.js endpoint:
 
-**BEMÆRK:** Backend-delen kræver din **Secret Key** fra Unsplash (findes under "Keys" i din app). Secret Key må ALDRIG inkluderes i frontend-kode - kun i backend miljøvariabler.
+**NOTE:** The backend requires your **Secret Key** from Unsplash (found under "Keys" in your app). Secret Key must NEVER be included in frontend code - only in backend environment variables.
 
 ```javascript
 // server/api/unsplash-token.js (Nuxt example)
@@ -203,7 +203,7 @@ export default defineEventHandler(async (event) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       client_id: process.env.UNSPLASH_ACCESS_KEY,
-      client_secret: process.env.UNSPLASH_SECRET_KEY,  // ⚠️ Kun i backend! Ikke i .env
+      client_secret: process.env.UNSPLASH_SECRET_KEY,  // ⚠️ Backend only! Not in .env
       redirect_uri: process.env.UNSPLASH_REDIRECT_URI,
       code,
       grant_type: 'authorization_code',
@@ -215,17 +215,17 @@ export default defineEventHandler(async (event) => {
 })
 ```
 
-**Backend miljøvariabler (fx i `.env.server`):**
+**Backend environment variables (e.g., in `.env.server`):**
 ```env
-UNSPLASH_ACCESS_KEY=din_access_key
-UNSPLASH_SECRET_KEY=din_secret_key
+UNSPLASH_ACCESS_KEY=your_access_key
+UNSPLASH_SECRET_KEY=your_secret_key
 UNSPLASH_REDIRECT_URI=http://localhost:3000/auth/callback
 ```
 
-Opdater `unsplashAuth.ts` til at kalde din backend:
+Update `unsplashAuth.ts` to call your backend:
 
 ```typescript
-// I handleCallback()
+// In handleCallback()
 const response = await fetch('/api/unsplash-token', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -238,28 +238,28 @@ const response = await fetch('/api/unsplash-token', {
 
 ## 🎨 Design Decisions
 
-- **Debounce:** 300ms balance mellem responsivitet og API-kald
-- **Grid:** Min 140px celler, object-fit: cover for konsistent visning
+- **Debounce:** 300ms balance between responsiveness and API calls
+- **Grid:** Min 140px cells, object-fit: cover for consistent display
 - **Transitions:** 150-200ms for smooth UX
-- **Billede-kvalitet:** `urls.small` til thumbs, `urls.regular` til valgt (balance mellem kvalitet og load-tid)
-- **Tilgængelighed:** ARIA-roller, keyboard navigation (Enter/Space åbner, ESC lukker), focus trap i modal
+- **Image quality:** `urls.small` for thumbs, `urls.regular` for selected (balance between quality and load time)
+- **Accessibility:** ARIA roles, keyboard navigation (Enter/Space opens, ESC closes), focus trap in modal
 
-## 🧪 Test
+## 🧪 Testing
 
-Start i **dummy mode** og test:
+Start in **dummy mode** and test:
 
-1. ✅ Hover viser overlay med ikon
-2. ✅ Klik åbner modal med fokus i input
-3. ✅ Grid viser 20 mock thumbs
-4. ✅ Klik på thumb opdaterer billede og lukker modal
-5. ✅ ESC og backdrop-klik lukker modal
-6. ✅ Chips udfylder input og trigger søgning
+1. ✅ Hover shows overlay with icon
+2. ✅ Click opens modal with focus on input
+3. ✅ Grid shows 20 mock thumbs
+4. ✅ Click on thumb updates image and closes modal
+5. ✅ ESC and backdrop click close modal
+6. ✅ Chips populate input and trigger search
 
-Skift til **live mode** og test:
+Switch to **live mode** and test:
 
-1. ✅ Skriv "cat" (≥3 tegn) → loading → resultater
-2. ✅ Vælg billede → opdateret v-model
-3. ✅ Ingen runtime errors i console
+1. ✅ Type "cat" (≥3 chars) → loading → results
+2. ✅ Select image → updated v-model
+3. ✅ No runtime errors in console
 
 ## 📦 Build
 
@@ -267,7 +267,7 @@ Skift til **live mode** og test:
 npm run build
 ```
 
-Output i `dist/` folder.
+Output in `dist/` folder.
 
 ## 🛠️ Tech Stack
 
@@ -275,7 +275,7 @@ Output i `dist/` folder.
 - **Vite** (dev server & bundler)
 - **TypeScript** (type safety)
 - **unsplash-js** (Unsplash API client)
-- **Ren CSS** (ingen frameworks)
+- **Vanilla CSS** (no frameworks)
 
 ## 📄 License
 
