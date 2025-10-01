@@ -191,6 +191,8 @@ Komponenten er bygget framework-agnostisk og kan nemt kopieres til Nuxt:
 
 Unsplash's token exchange kræver normalt en backend pga. CORS. Her er en minimal Node.js endpoint:
 
+**BEMÆRK:** Backend-delen kræver din **Secret Key** fra Unsplash (findes under "Keys" i din app). Secret Key må ALDRIG inkluderes i frontend-kode - kun i backend miljøvariabler.
+
 ```javascript
 // server/api/unsplash-token.js (Nuxt example)
 export default defineEventHandler(async (event) => {
@@ -201,7 +203,7 @@ export default defineEventHandler(async (event) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       client_id: process.env.UNSPLASH_ACCESS_KEY,
-      client_secret: process.env.UNSPLASH_SECRET_KEY,
+      client_secret: process.env.UNSPLASH_SECRET_KEY,  // ⚠️ Kun i backend! Ikke i .env
       redirect_uri: process.env.UNSPLASH_REDIRECT_URI,
       code,
       grant_type: 'authorization_code',
@@ -211,6 +213,13 @@ export default defineEventHandler(async (event) => {
 
   return await response.json()
 })
+```
+
+**Backend miljøvariabler (fx i `.env.server`):**
+```env
+UNSPLASH_ACCESS_KEY=din_access_key
+UNSPLASH_SECRET_KEY=din_secret_key
+UNSPLASH_REDIRECT_URI=http://localhost:3000/auth/callback
 ```
 
 Opdater `unsplashAuth.ts` til at kalde din backend:
