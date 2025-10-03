@@ -158,6 +158,7 @@ The component is built framework-agnostic and can easily be copied to Nuxt:
    cp src/lib/unsplash.ts <nuxt>/lib/
    cp src/lib/debounce.ts <nuxt>/lib/
    cp src/auth/unsplashAuth.ts <nuxt>/auth/
+   cp src/config/search-tags.json <nuxt>/config/
    ```
 
 2. **Install dependencies:**
@@ -165,26 +166,71 @@ The component is built framework-agnostic and can easily be copied to Nuxt:
    npm install unsplash-js
    ```
 
-3. **Update imports in Nuxt:**
-   - Use `~/lib/unsplash` instead of relative paths
-   - Add Unsplash env vars to `.env` (same format)
+3. **Configure Nuxt environment variables:**
 
-4. **Use in Nuxt pages/components:**
+   Add to `nuxt.config.ts`:
+   ```typescript
+   export default defineNuxtConfig({
+     runtimeConfig: {
+       public: {
+         unsplashAccessKey: process.env.NUXT_PUBLIC_UNSPLASH_ACCESS_KEY || '',
+         unsplashOauthEnabled: process.env.NUXT_PUBLIC_UNSPLASH_OAUTH_ENABLED === 'true',
+         unsplashRedirectUri: process.env.NUXT_PUBLIC_UNSPLASH_REDIRECT_URI || '',
+         appDummyMode: process.env.NUXT_PUBLIC_APP_DUMMY_MODE === 'true',
+       }
+     }
+   })
+   ```
+
+   Create `.env`:
+   ```env
+   NUXT_PUBLIC_UNSPLASH_ACCESS_KEY=your_access_key_here
+   NUXT_PUBLIC_UNSPLASH_OAUTH_ENABLED=false
+   NUXT_PUBLIC_UNSPLASH_REDIRECT_URI=http://localhost:3000/auth/callback
+   NUXT_PUBLIC_APP_DUMMY_MODE=true
+   ```
+
+4. **Update `lib/unsplash.ts` for Nuxt:**
+
+   Replace all `import.meta.env.VITE_*` with `useRuntimeConfig()`:
+   ```typescript
+   // At the top of functions that need config
+   const config = useRuntimeConfig()
+
+   // Replace:
+   // import.meta.env.VITE_APP_DUMMY_MODE === 'true'
+   // With:
+   config.public.appDummyMode
+
+   // Replace:
+   // import.meta.env.VITE_UNSPLASH_ACCESS_KEY
+   // With:
+   config.public.unsplashAccessKey
+   ```
+
+5. **Update `auth/unsplashAuth.ts` for Nuxt:**
+   ```typescript
+   const config = useRuntimeConfig()
+   const clientId = config.public.unsplashAccessKey
+   const redirectUri = config.public.unsplashRedirectUri
+   ```
+
+6. **Update imports in components:**
+   - Change `../lib/unsplash` → `~/lib/unsplash`
+   - Change `../auth/unsplashAuth` → `~/auth/unsplashAuth`
+   - Change `../config/search-tags.json` → `~/config/search-tags.json`
+
+7. **Use in Nuxt pages/components:**
    ```vue
    <script setup>
-   const imageSrc = ref('...')
+   const imageSrc = ref('https://images.unsplash.com/photo-1638368593249-7cadb261e8b3?q=80&w=700')
    </script>
 
    <template>
-     <ImageReplacer v-model="imageSrc" />
+     <ClientOnly>
+       <ImageReplacer v-model="imageSrc" />
+     </ClientOnly>
    </template>
-   ```
-
-5. **Client-side only (if needed):**
-   ```vue
-   <ClientOnly>
-     <ImageReplacer v-model="imageSrc" />
-   </ClientOnly>
    ```
 
 ## 🔐 OAuth Backend Setup
