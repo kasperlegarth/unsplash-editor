@@ -22,6 +22,7 @@ const emit = defineEmits<{
 // State
 const isModalOpen = ref(false)
 const searchQuery = ref('')
+const customUrl = ref('')
 const searchResults = ref<UnsplashPhoto[]>([])
 const isLoading = ref(false)
 const error = ref<string | null>(null)
@@ -68,6 +69,7 @@ function closeModal() {
   isModalOpen.value = false
   // Reset state
   searchQuery.value = ''
+  customUrl.value = ''
   searchResults.value = []
   isLoading.value = false
   error.value = null
@@ -106,6 +108,19 @@ function handleBackdropClick(event: MouseEvent) {
 function handleModalKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') {
     closeModal()
+  }
+}
+
+function handleCustomUrl() {
+  if (customUrl.value.trim()) {
+    emit('update:modelValue', customUrl.value.trim())
+    closeModal()
+  }
+}
+
+function handleCustomUrlKeydown(event: KeyboardEvent) {
+  if (event.key === 'Enter') {
+    handleCustomUrl()
   }
 }
 </script>
@@ -174,6 +189,32 @@ function handleModalKeydown(event: KeyboardEvent) {
           </div>
 
           <div class="modal-body">
+            <!-- Custom URL input -->
+            <div class="custom-url-container">
+              <input
+                type="text"
+                class="custom-url-input"
+                placeholder="Paste image URL…"
+                v-model="customUrl"
+                @keydown="handleCustomUrlKeydown"
+              />
+              <svg
+                class="enter-icon"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                @click="handleCustomUrl"
+              >
+                <polyline points="9 10 4 15 9 20"></polyline>
+                <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
+              </svg>
+            </div>
+
             <!-- Search input -->
             <input
               type="text"
@@ -357,6 +398,39 @@ function handleModalKeydown(event: KeyboardEvent) {
   padding: 24px;
   overflow-y: auto;
   flex: 1;
+}
+
+.custom-url-container {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.custom-url-input {
+  width: 100%;
+  padding: 12px 48px 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 150ms ease;
+}
+
+.custom-url-input:focus {
+  border-color: #3b82f6;
+}
+
+.enter-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.enter-icon:hover {
+  color: #3b82f6;
 }
 
 .modal-search-input {

@@ -17,7 +17,10 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(taskkill:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nInitial commit: Unsplash Image Replacer Vue 3 component\n\n- Genbrugelig ImageReplacer komponent med v-model support\n- Unsplash API integration (dummy/live/oauth modes)\n- Debounced search (300ms) med configurable tags\n- PKCE OAuth flow implementation\n- Responsive grid layout med smooth transitions\n- Fuldt tilgængelig (ARIA, keyboard navigation)\n- TypeScript med strict mode\n- Demo app med alle modes\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
