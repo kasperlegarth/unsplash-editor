@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { searchPhotos } from '../lib/unsplash'
-import type { UnsplashPhoto } from '../lib/unsplash'
-import { debounce } from '../lib/debounce'
-import searchTagsConfig from '../config/search-tags.json'
+import { searchPhotos } from '~/lib/unsplash'
+import type { UnsplashPhoto } from '~/lib/unsplash'
+import { debounce } from '~/lib/debounce'
+import searchTagsConfig from '~/config/search-tags.json'
 
 interface Props {
   modelValue: string

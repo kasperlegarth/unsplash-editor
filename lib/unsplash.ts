@@ -6,7 +6,7 @@
 import { createApi } from 'unsplash-js'
 import type { ApiResponse } from 'unsplash-js/dist/helpers/response'
 import type { Basic } from 'unsplash-js/dist/methods/photos/types'
-import { getAccessToken } from '../auth/unsplashAuth'
+import { getAccessToken } from '~/auth/unsplashAuth'
 
 export interface UnsplashPhoto {
   id: string
@@ -42,11 +42,11 @@ function generateMockResults(query: string): SearchResult {
 
   // Generér 20 mock billeder baseret på de 5 URLs
   for (let i = 0; i < 20; i++) {
-    const baseUrl = MOCK_URLS[i % MOCK_URLS.length]
+    const baseUrl = MOCK_URLS[i % MOCK_URLS.length]!
     results.push({
       id: `mock-${i}`,
       urls: {
-        thumb: baseUrl,
+        thumb: baseUrl.replace('w=700', 'w=200'),
         small: baseUrl,
         regular: baseUrl.replace('w=700', 'w=1080'),
       },
@@ -73,14 +73,15 @@ function getApiClient() {
     return apiClient
   }
 
-  const isDummyMode = import.meta.env.VITE_APP_DUMMY_MODE === 'true'
+  const config = useRuntimeConfig()
+  const isDummyMode = config.public.appDummyMode
 
   if (isDummyMode) {
     // Dummy mode - ingen rigtig API
     return null
   }
 
-  const accessKey = import.meta.env.VITE_UNSPLASH_ACCESS_KEY
+  const accessKey = config.public.unsplashAccessKey
   const oauthToken = getAccessToken()
 
   if (oauthToken) {
@@ -94,7 +95,7 @@ function getApiClient() {
       accessKey,
     })
   } else {
-    throw new Error('Missing VITE_UNSPLASH_ACCESS_KEY - check your .env file')
+    throw new Error('Missing NUXT_PUBLIC_UNSPLASH_ACCESS_KEY - check your .env file')
   }
 
   return apiClient
@@ -104,7 +105,8 @@ function getApiClient() {
  * Søger efter billeder på Unsplash
  */
 export async function searchPhotos(query: string): Promise<SearchResult> {
-  const isDummyMode = import.meta.env.VITE_APP_DUMMY_MODE === 'true'
+  const config = useRuntimeConfig()
+  const isDummyMode = config.public.appDummyMode
 
   // Dummy mode
   if (isDummyMode) {

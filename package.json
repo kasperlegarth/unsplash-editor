@@ -1,21 +1,29 @@
 {
-  "name": "unsplash-editor",
+  "name": "pagebuilder-tools",
+  "version": "0.3.0",
+  "description": "A modular pagebuilder toolkit with reusable components and configurable modules for building beautiful pages",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "nuxt": "^4.0.0",
     "unsplash-js": "^7.0.19",
-    "vue": "^3.4.21"
+    "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.4",
-    "typescript": "^5.2.2",
-    "vite": "^5.2.0",
-    "vue-tsc": "^2.0.6"
+    "@nuxt/devtools": "^1.6.0",
+    "typescript": "^5.7.2",
+    "vue-tsc": "^2.1.10"
+  },
+  "engines": {
+    "node": "^18.0.0 || ^20.0.0 || ^22.0.0",
+    "npm": ">=9.0.0"
   }
 }

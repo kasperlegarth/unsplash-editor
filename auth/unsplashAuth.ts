@@ -22,7 +22,7 @@ function generateRandomString(length: number): string {
   crypto.getRandomValues(randomValues)
 
   for (let i = 0; i < length; i++) {
-    result += chars[randomValues[i] % chars.length]
+    result += chars[randomValues[i]! % chars.length]
   }
 
   return result
@@ -48,11 +48,12 @@ async function sha256(plain: string): Promise<string> {
  * Initierer OAuth login flow
  */
 export async function initiateLogin(): Promise<void> {
-  const clientId = import.meta.env.VITE_UNSPLASH_ACCESS_KEY
-  const redirectUri = import.meta.env.VITE_UNSPLASH_REDIRECT_URI
+  const config = useRuntimeConfig()
+  const clientId = config.public.unsplashAccessKey
+  const redirectUri = config.public.unsplashRedirectUri
 
   if (!clientId || !redirectUri) {
-    throw new Error('Missing VITE_UNSPLASH_ACCESS_KEY or VITE_UNSPLASH_REDIRECT_URI')
+    throw new Error('Missing NUXT_PUBLIC_UNSPLASH_ACCESS_KEY or NUXT_PUBLIC_UNSPLASH_REDIRECT_URI')
   }
 
   // Generér PKCE parameters
@@ -110,6 +111,8 @@ export async function handleCallback(): Promise<{ success: boolean; error?: stri
     return { success: false, error: 'State mismatch - possible CSRF attack' }
   }
 
+  const config = useRuntimeConfig()
+
   // Exchange code for token
   // BEMÆRK: Dette vil sandsynligvis fejle pga. CORS restrictions fra Unsplash
   try {
@@ -119,9 +122,9 @@ export async function handleCallback(): Promise<{ success: boolean; error?: stri
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        client_id: import.meta.env.VITE_UNSPLASH_ACCESS_KEY,
+        client_id: config.public.unsplashAccessKey,
         code,
-        redirect_uri: import.meta.env.VITE_UNSPLASH_REDIRECT_URI,
+        redirect_uri: config.public.unsplashRedirectUri,
         grant_type: 'authorization_code',
         code_verifier: pkceState.codeVerifier,
       }),
@@ -153,6 +156,7 @@ export async function handleCallback(): Promise<{ success: boolean; error?: stri
  * Henter gemt access token
  */
 export function getAccessToken(): string | null {
+  if (typeof window === 'undefined') return null
   return sessionStorage.getItem(TOKEN_KEY)
 }
 
@@ -160,6 +164,7 @@ export function getAccessToken(): string | null {
  * Logger ud (fjerner token)
  */
 export function logout(): void {
+  if (typeof window === 'undefined') return
   sessionStorage.removeItem(TOKEN_KEY)
   sessionStorage.removeItem(PKCE_KEY)
 }

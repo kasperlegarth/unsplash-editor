@@ -3,7 +3,7 @@
  * Forsinker funktionskald indtil der er gået X ms uden nye kald
  */
 
-export function debounce<T extends (...args: unknown[]) => void>(
+export function debounce<T extends (...args: any[]) => any>(
   func: T,
   delay: number
 ): (...args: Parameters<T>) => void {

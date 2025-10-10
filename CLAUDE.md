@@ -2,87 +2,256 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Overview
+
+**pagebuilder-tools** er et modulært pagebuilder toolkit med genbrugelige komponenter og konfigurer bare moduler til at bygge smukke sider. Projektet er bygget med Nuxt 4 og TypeScript.
+
+**Version:** 0.3.0
+
 ## Development Commands
 
 ```bash
 npm install              # Install dependencies
-npm run dev             # Start dev server (port 3000)
-npm run build           # Type-check og build til produktion
+npm run dev             # Start Nuxt dev server (port 3000)
+npm run build           # Build til produktion
+npm run generate        # Generate static site
 npm run preview         # Preview production build
+npm run typecheck       # Run TypeScript type check
 ```
 
 ## Architecture Overview
 
-### Three-Mode System
-Projektet understøtter tre operation modes styret via `.env`:
+### Nuxt 4 Project Structure
 
-1. **Dummy Mode** (`VITE_APP_DUMMY_MODE=true`): Mock data, ingen API-kald. Returnerer 20 genererede billeder baseret på 5 hardcoded URLs.
-2. **Live Mode** (`VITE_APP_DUMMY_MODE=false` + Access Key): Bruger Unsplash public API med access key.
-3. **OAuth Mode** (`VITE_UNSPLASH_OAUTH_ENABLED=true`): PKCE OAuth flow for højere rate limits. **VIGTIGT**: Token exchange kræver backend pga. CORS - se README for implementation.
-
-Mode-logikken er centraliseret i `src/lib/unsplash.ts` via singleton API client.
-
-### Core Component Structure
-
-**ImageReplacer.vue** er en genbrugelig, framework-agnostisk komponent:
-- Props: `modelValue` (v-model billede-URL), `placeholder`, `tags` (optional override)
-- Emits: `update:modelValue` ved billedvalg
-- State management: Lokal ref-baseret state (ikke Pinia/Vuex)
-- Modal lifecycle: Åbn → fokus input → søg/vælg → luk + reset state
-
-**Search Tags Configuration:**
-Tags hentes fra `src/config/search-tags.json` som default, men kan overrides via props:
-```vue
-<ImageReplacer :tags="['Custom', 'Tags']" />
+```
+/components       # Genbrugelige UI komponenter (ImageReplacer, Headline, Text)
+/modules          # Moduler med egne indstillinger (TextImage)
+  /ModuleName
+    /ModuleName.vue   # Modul komponent
+    /types.ts         # Modul-specifikke types
+/types            # Global types (module base settings)
+  /modules.ts     # BaseModuleSettings interface
+/lib              # Utility libraries (unsplash, debounce)
+/auth             # Authentication helpers (OAuth)
+/config           # Configuration filer (search-tags.json)
+/assets/css       # Global styles
+/pages            # Nuxt pages (index.vue demo)
+nuxt.config.ts    # Nuxt konfiguration
 ```
 
-### API Wrapper Pattern
+### Modular Architecture
 
-`src/lib/unsplash.ts` wrapper `unsplash-js` biblioteket:
-- Singleton pattern: API client initialiseres én gang baseret på mode
-- Mock data generering i dummy mode (500ms simuleret delay)
-- Error handling for rate limits (403) med brugervenlig besked
-- Type mapping: Unsplash API response → `UnsplashPhoto` interface
+Projektet følger en **component + module** arkitektur:
 
-### PKCE OAuth Flow
+#### **Components** (`/components`)
+Små, genbrugelige UI-dele med fokus på én funktionalitet:
+- **ImageReplacer**: Unsplash image picker med v-model
+- **Headline**: Konfigurerbar overskrift (h1-h6, alignment)
+- **Text**: Tekst komponent med size og alignment
 
-`src/auth/unsplashAuth.ts` implementerer client-side PKCE:
-- Code verifier/challenge generering via Web Crypto API
-- State parameter for CSRF protection
-- Token storage i sessionStorage (ikke localStorage)
-- **Begrænsning**: Direct token exchange vil fejle pga. CORS - dokumenteret fallback til backend i README
+Komponenter er:
+- **Selvstændige**: Minimal eksterne dependencies
+- **Konfigurerbare**: Props til customization
+- **Accessible**: ARIA, keyboard navigation
+- **Type-safe**: TypeScript strict mode
 
-## Key Design Patterns
+#### **Modules** (`/modules`)
+Sammensatte blokke der kombinerer komponenter med indstillinger:
+- Alle moduler arver **fælles base settings** (backgroundColor, padding)
+- Hvert modul har **unikke settings** (fx imagePosition for TextImage)
+- Moduler består af én eller flere komponenter
 
-### Debounce Implementation
-`src/lib/debounce.ts` er en generisk utility:
-- 300ms delay hardcoded i `ImageReplacer.vue` (kan ekstrahere til prop hvis nødvendigt)
-- Bruges kun til search input, ikke til chip clicks (instant trigger)
+**Eksempel: TextImage modul**
+- Kombinerer: Headline + Text + ImageReplacer
+- Base settings: backgroundColor, paddingTop, paddingBottom
+- Unique settings: imagePosition ('left' | 'right')
 
-### Modal Focus Management
-- `setTimeout(..., 100)` efter modal open for fokus på input (venter på DOM render)
-- ESC og backdrop click lukker modal
-- Enter/Space på image container åbner modal (keyboard accessibility)
+#### **Types System** (`/types`)
 
-### Environment Variable Naming
-Alle env vars bruger `VITE_` prefix (Vite requirement):
-- `VITE_APP_DUMMY_MODE`: Boolean string ("true"/"false")
-- `VITE_UNSPLASH_ACCESS_KEY`: Public access key (OK i browser for read-only)
-- `VITE_UNSPLASH_OAUTH_ENABLED`: Aktiverer OAuth flow
-- `VITE_UNSPLASH_REDIRECT_URI`: OAuth callback URL (skal matche Unsplash app settings)
+**Base Module Settings** (`types/modules.ts`):
+```typescript
+export interface BaseModuleSettings {
+  backgroundColor: BackgroundColor  // 'white' | 'light-gray' | 'gray' | 'dark-gray' | 'black'
+  paddingTop?: 'none' | 'small' | 'medium' | 'large'
+  paddingBottom?: 'none' | 'small' | 'medium' | 'large'
+}
+```
 
-## Nuxt Migration Path
+**Module-Specific Settings** (fx `modules/TextImage/types.ts`):
+```typescript
+export interface TextImageSettings extends BaseModuleSettings {
+  imagePosition: 'left' | 'right'  // Unique setting
+  headline: string
+  text: string
+  imageUrl: string
+}
+```
 
-Komponenten er designet til at kunne kopieres direkte til Nuxt:
-- Ingen Vite-specifik runtime kode
-- Relative imports (skal ændres til `~/lib/...` i Nuxt)
-- Client-side only logic (brug `<ClientOnly>` wrapper hvis SSR issues)
-- sessionStorage i OAuth flow er browser-only
+## Key Components
 
-## TypeScript Strict Mode
+### ImageReplacer (`components/ImageReplacer.vue`)
 
-Projektet bruger strict TypeScript:
-- `noUnusedLocals` og `noUnusedParameters` enabled
+Unsplash image picker med tre operation modes:
+
+1. **Dummy Mode**: Mock data, ingen API-kald
+2. **Live Mode**: Unsplash public API med access key
+3. **OAuth Mode**: PKCE OAuth flow (kræver backend)
+
+**Props:**
+```typescript
+interface Props {
+  modelValue: string      // Image URL (v-model)
+  placeholder?: string    // Fallback URL
+  tags?: string[]        // Override search tags
+}
+```
+
+### Headline (`components/Headline.vue`)
+
+**Props:**
+```typescript
+interface Props {
+  text: string
+  level?: 1 | 2 | 3 | 4 | 5 | 6
+  align?: 'left' | 'center' | 'right'
+}
+```
+
+### Text (`components/Text.vue`)
+
+**Props:**
+```typescript
+interface Props {
+  content: string
+  size?: 'small' | 'normal' | 'large'
+  align?: 'left' | 'center' | 'right'
+}
+```
+
+## Key Modules
+
+### TextImage (`modules/TextImage/TextImage.vue`)
+
+Kombinerer headline, text og image med konfigurerbar layout.
+
+**Props:**
+```typescript
+interface Props {
+  settings: TextImageSettings
+  editable?: boolean  // Enable ImageReplacer editing
+}
+```
+
+**Settings:**
+```typescript
+interface TextImageSettings extends BaseModuleSettings {
+  imagePosition: 'left' | 'right'
+  headline: string
+  text: string
+  imageUrl: string
+}
+```
+
+**Usage:**
+```vue
+<TextImage
+  :settings="{
+    backgroundColor: 'white',
+    paddingTop: 'medium',
+    imagePosition: 'right',
+    headline: 'My Headline',
+    text: 'My text content',
+    imageUrl: 'https://...'
+  }"
+  :editable="true"
+/>
+```
+
+## Creating New Modules
+
+For at oprette et nyt modul:
+
+1. **Opret modul folder**: `/modules/YourModule/`
+2. **Definer types** (`types.ts`):
+   ```typescript
+   import type { BaseModuleSettings } from '~/types/modules'
+
+   export interface YourModuleSettings extends BaseModuleSettings {
+     // Add unique settings
+     uniqueSetting: string
+   }
+   ```
+
+3. **Opret komponent** (`YourModule.vue`):
+   ```vue
+   <script setup lang="ts">
+   import type { YourModuleSettings } from './types'
+
+   interface Props {
+     settings: YourModuleSettings
+   }
+
+   const props = defineProps<Props>()
+   </script>
+   ```
+
+4. **Brug komponenter**: Import og brug eksisterende komponenter (Headline, Text, etc.)
+
+## Environment Variables
+
+Nuxt 4 bruger `runtimeConfig` - env vars mappes automatisk.
+
+### Public Variables (exposed to client)
+- `NUXT_PUBLIC_UNSPLASH_ACCESS_KEY`: Unsplash access key
+- `NUXT_PUBLIC_UNSPLASH_OAUTH_ENABLED`: Enable OAuth flow
+- `NUXT_PUBLIC_UNSPLASH_REDIRECT_URI`: OAuth redirect URI
+- `NUXT_PUBLIC_APP_DUMMY_MODE`: Use mock data mode
+
+### Private Variables (server-only)
+- `NUXT_UNSPLASH_SECRET_KEY`: Unsplash secret key (KUN backend)
+
+**Brug i kode:**
+```typescript
+const config = useRuntimeConfig()
+const isDummyMode = config.public.appDummyMode
+```
+
+## TypeScript Configuration
+
+- `strict: true`
+- `typeCheck: true` i Nuxt config
 - Alle komponenter bruger `<script setup lang="ts">`
-- Props interfaces eksplicit defineret med `withDefaults`
-- JSON imports kræver `resolveJsonModule: true` i tsconfig
+- Props interfaces eksplicit defineret
+
+## Design Patterns
+
+### Module Pattern
+- Arv fra `BaseModuleSettings` for fælles indstillinger
+- Tilføj unique settings i modul-specifikke interfaces
+- Brug computed styles baseret på settings
+- Support både static og editable mode
+
+### Component Composition
+- Små, fokuserede komponenter
+- Auto-import via Nuxt
+- Props over events hvor muligt
+- Type-safe interfaces
+
+## Best Practices
+
+1. **Modules**: Arv altid fra `BaseModuleSettings`
+2. **Components**: Hold fokuseret på én funktionalitet
+3. **Types**: Definer interfaces for alle props
+4. **Auto-imports**: Nuxt importerer automatisk fra `/components` og `/modules`
+5. **Composables**: Brug `~/` prefix til imports
+6. **Accessibility**: ARIA labels, keyboard navigation
+7. **Responsive**: Mobile-first design
+
+## Future Roadmap
+
+Planlagte moduler:
+- Hero module (headline + CTA + background image)
+- Gallery module (image grid)
+- Form module (contact forms)
+- Testimonial module
+- Pricing table module

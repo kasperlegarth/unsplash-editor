@@ -1,17 +1,20 @@
-# Unsplash Image Replacer
+# Pagebuilder Tools
 
-A reusable Vue 3 component for selecting and replacing images from Unsplash. Built with Vite, TypeScript, and vanilla CSS.
+A modular pagebuilder toolkit with reusable Vue 3 components and configurable modules for building beautiful pages. Built with Nuxt 4, TypeScript, and designed to be framework-agnostic.
+
+**Version:** 0.3.0
 
 ## ✨ Features
 
-- 🖼️ Interactive image replacer with hover overlay
-- 🔍 Debounced Unsplash search (300ms)
-- 🏷️ Configurable search tags from JSON (or via props)
-- ♿ Fully accessible (ARIA, keyboard navigation, focus management)
-- 🎨 Pixel-perfect UI with smooth transitions
-- 🔐 OAuth PKCE support for higher rate limits
-- 🎭 Dummy mode for UI demo without API key
-- 📝 v-model support for reactive image switching
+- 🧩 **Modular Architecture**: Components + Modules system
+- 🎨 **Base Settings**: All modules share common settings (background, padding)
+- ⚙️ **Unique Settings**: Each module has tailored settings
+- 🖼️ **ImageReplacer**: Unsplash integration with dummy/live/OAuth modes
+- 📝 **Text Components**: Headline and Text with alignment and sizing
+- 🔧 **TextImage Module**: Combine text and images with flexible layouts
+- ♿ **Accessible**: ARIA labels and keyboard navigation
+- 📱 **Responsive**: Mobile-first design
+- 🔒 **TypeScript**: Strict mode with full type safety
 
 ## 🚀 Quickstart
 
@@ -29,299 +32,269 @@ Copy `.env.example` to `.env`:
 cp .env.example .env
 ```
 
-### 3. Choose Mode
-
-#### **Dummy Mode** (no API key required)
-
-```env
-VITE_APP_DUMMY_MODE=true
-```
-
-Run the app:
+### 3. Run
 
 ```bash
 npm run dev
 ```
 
-Dummy mode uses mock data and requires no Unsplash account. Perfect for UI development and demos.
+Open [http://localhost:3000](http://localhost:3000) to see the demo.
 
-#### **Live Mode** (requires Unsplash Access Key)
+## 📐 Architecture
 
-1. Create an Unsplash Developer account at [https://unsplash.com/developers](https://unsplash.com/developers)
-2. Create a new app and get your **Access Key**
-3. Update `.env`:
+### Components vs Modules
 
-```env
-VITE_APP_DUMMY_MODE=false
-VITE_UNSPLASH_ACCESS_KEY=your_access_key_here
-VITE_UNSPLASH_OAUTH_ENABLED=false
+**Components** (`/components`) are small, focused UI elements:
+- **ImageReplacer**: Unsplash image picker
+- **Headline**: h1-h6 with alignment
+- **Text**: Content with size and alignment
+
+**Modules** (`/modules`) combine components with settings:
+- **All modules** inherit base settings (backgroundColor, padding)
+- **Each module** adds unique settings (e.g., imagePosition)
+- **TextImage**: Headline + Text + Image with layout control
+
+### Example: TextImage Module
+
+```vue
+<TextImage
+  :settings="{
+    backgroundColor: 'white',
+    paddingTop: 'medium',
+    paddingBottom: 'medium',
+    imagePosition: 'right',
+    headline: 'Your Headline',
+    text: 'Your text content here.',
+    imageUrl: 'https://images.unsplash.com/...'
+  }"
+  :editable="true"
+/>
 ```
 
-Run the app:
+**Base Settings** (all modules):
+- `backgroundColor`: 'white' | 'light-gray' | 'gray' | 'dark-gray' | 'black'
+- `paddingTop/Bottom`: 'none' | 'small' | 'medium' | 'large'
 
-```bash
-npm run dev
-```
+**Unique Settings** (TextImage):
+- `imagePosition`: 'left' | 'right'
+- `headline`: string
+- `text`: string
+- `imageUrl`: string
 
-#### **OAuth Mode** (higher rate limits)
-
-1. In your Unsplash app settings, add callback URL: `http://localhost:3000/auth/callback`
-2. Update `.env`:
-
-```env
-VITE_APP_DUMMY_MODE=false
-VITE_UNSPLASH_ACCESS_KEY=your_access_key_here
-VITE_UNSPLASH_OAUTH_ENABLED=true
-VITE_UNSPLASH_REDIRECT_URI=http://localhost:3000/auth/callback
-```
-
-Run the app and click "Login with Unsplash".
-
-**⚠️ OAuth Limitation:**
-Unsplash's token exchange endpoint has CORS restrictions. Full OAuth implementation requires a backend to exchange authorization code for access token. See "OAuth Backend Setup" below.
-
-## 📁 File Structure
+## 📁 Project Structure
 
 ```
-/src
-  /components
-    ImageReplacer.vue     # Main component
-  /lib
-    unsplash.ts           # Unsplash API wrapper
-    debounce.ts           # Debounce utility
-  /auth
-    unsplashAuth.ts       # PKCE OAuth helpers
-  App.vue                 # Demo app
-  main.ts
-  style.css
+/components
+  ImageReplacer.vue    # Unsplash picker with v-model
+  Headline.vue         # Configurable headline (h1-h6)
+  Text.vue            # Text content with styling
+
+/modules
+  /TextImage
+    TextImage.vue      # Module component
+    types.ts          # Module-specific types
+
+/types
+  modules.ts          # Base module settings interface
+
+/lib
+  unsplash.ts         # Unsplash API wrapper (dummy/live/OAuth)
+  debounce.ts         # Debounce utility
+
+/config
+  search-tags.json    # Default Unsplash search tags
+
+/pages
+  index.vue           # Demo page
+
+nuxt.config.ts        # Nuxt configuration
 ```
 
-## 🔧 Component API
+## 🧩 Available Components
 
-### Props
+### ImageReplacer
 
+Interactive image picker with Unsplash integration.
+
+**Props:**
 ```typescript
-interface Props {
-  modelValue: string      // Image URL (v-model)
-  placeholder?: string    // Fallback URL (default: Unsplash sample)
-  tags?: string[]         // Custom search tags (default: from src/config/search-tags.json)
-}
-```
-
-### Search Tags Configuration
-
-Search tags can be configured in two ways:
-
-**1. Via config file (default):**
-Edit `src/config/search-tags.json`:
-```json
 {
-  "tags": ["Food", "Sport", "Animals", "Nature", "Technology", "Travel", "Architecture", "People"]
+  modelValue: string      // Image URL (v-model)
+  placeholder?: string    // Fallback URL
+  tags?: string[]        // Custom search tags
 }
 ```
 
-**2. Via props (override):**
-```vue
-<ImageReplacer v-model="imageSrc" :tags="['Cats', 'Dogs', 'Birds']" />
-```
+**Modes:**
+1. **Dummy**: Mock data, no API key needed
+2. **Live**: Unsplash public API
+3. **OAuth**: Higher rate limits (requires backend)
 
-### Events
+### Headline
 
+Configurable headline component.
+
+**Props:**
 ```typescript
-// Emits new image URL
-emit('update:modelValue', url: string)
+{
+  text: string
+  level?: 1 | 2 | 3 | 4 | 5 | 6
+  align?: 'left' | 'center' | 'right'
+}
 ```
 
-### Usage in Your Project
+### Text
 
+Text content component.
+
+**Props:**
+```typescript
+{
+  content: string
+  size?: 'small' | 'normal' | 'large'
+  align?: 'left' | 'center' | 'right'
+}
+```
+
+## 🎨 Available Modules
+
+### TextImage
+
+Combines headline, text, and image with configurable layout.
+
+**Settings:**
+```typescript
+interface TextImageSettings extends BaseModuleSettings {
+  imagePosition: 'left' | 'right'
+  headline: string
+  text: string
+  imageUrl: string
+}
+```
+
+**Features:**
+- ✅ Image left or right of text
+- ✅ Configurable background colors
+- ✅ Adjustable padding
+- ✅ Editable mode with ImageReplacer
+- ✅ Responsive layout (stacks on mobile)
+
+## 🛠️ Creating New Modules
+
+1. **Create module folder**: `/modules/YourModule/`
+
+2. **Define types** (`types.ts`):
+```typescript
+import type { BaseModuleSettings } from '~/types/modules'
+
+export interface YourModuleSettings extends BaseModuleSettings {
+  // Add unique settings
+  uniqueSetting: string
+}
+
+export const defaultYourModuleSettings: YourModuleSettings = {
+  backgroundColor: 'white',
+  paddingTop: 'medium',
+  paddingBottom: 'medium',
+  uniqueSetting: 'default value'
+}
+```
+
+3. **Create component** (`YourModule.vue`):
 ```vue
-<script setup>
-import { ref } from 'vue'
-import ImageReplacer from './components/ImageReplacer.vue'
+<script setup lang="ts">
+import type { YourModuleSettings } from './types'
 
-const imageSrc = ref('https://images.unsplash.com/photo-1638368593249-7cadb261e8b3?q=80&w=700')
+interface Props {
+  settings: YourModuleSettings
+}
+
+const props = defineProps<Props>()
+
+// Map background colors
+const bgColorMap = {
+  'white': '#ffffff',
+  'light-gray': '#f9fafb',
+  'gray': '#e5e7eb',
+  'dark-gray': '#374151',
+  'black': '#111827'
+}
+
+const moduleStyles = computed(() => ({
+  backgroundColor: bgColorMap[props.settings.backgroundColor],
+  // ... padding logic
+}))
 </script>
 
 <template>
-  <ImageReplacer v-model="imageSrc" />
+  <div class="your-module" :style="moduleStyles">
+    <!-- Use existing components -->
+    <Headline :text="settings.headline" />
+    <Text :content="settings.text" />
+  </div>
 </template>
 ```
 
-## 🎯 Copy to Nuxt
-
-The component is built framework-agnostic and can easily be copied to Nuxt:
-
-1. **Copy files:**
-   ```bash
-   # From Vue/Vite project to Nuxt
-   cp src/components/ImageReplacer.vue <nuxt>/components/
-   cp src/lib/unsplash.ts <nuxt>/lib/
-   cp src/lib/debounce.ts <nuxt>/lib/
-   cp src/auth/unsplashAuth.ts <nuxt>/auth/
-   cp src/config/search-tags.json <nuxt>/config/
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install unsplash-js
-   ```
-
-3. **Configure Nuxt environment variables:**
-
-   Add to `nuxt.config.ts`:
-   ```typescript
-   export default defineNuxtConfig({
-     runtimeConfig: {
-       public: {
-         unsplashAccessKey: process.env.NUXT_PUBLIC_UNSPLASH_ACCESS_KEY || '',
-         unsplashOauthEnabled: process.env.NUXT_PUBLIC_UNSPLASH_OAUTH_ENABLED === 'true',
-         unsplashRedirectUri: process.env.NUXT_PUBLIC_UNSPLASH_REDIRECT_URI || '',
-         appDummyMode: process.env.NUXT_PUBLIC_APP_DUMMY_MODE === 'true',
-       }
-     }
-   })
-   ```
-
-   Create `.env`:
-   ```env
-   NUXT_PUBLIC_UNSPLASH_ACCESS_KEY=your_access_key_here
-   NUXT_PUBLIC_UNSPLASH_OAUTH_ENABLED=false
-   NUXT_PUBLIC_UNSPLASH_REDIRECT_URI=http://localhost:3000/auth/callback
-   NUXT_PUBLIC_APP_DUMMY_MODE=true
-   ```
-
-4. **Update `lib/unsplash.ts` for Nuxt:**
-
-   Replace all `import.meta.env.VITE_*` with `useRuntimeConfig()`:
-   ```typescript
-   // At the top of functions that need config
-   const config = useRuntimeConfig()
-
-   // Replace:
-   // import.meta.env.VITE_APP_DUMMY_MODE === 'true'
-   // With:
-   config.public.appDummyMode
-
-   // Replace:
-   // import.meta.env.VITE_UNSPLASH_ACCESS_KEY
-   // With:
-   config.public.unsplashAccessKey
-   ```
-
-5. **Update `auth/unsplashAuth.ts` for Nuxt:**
-   ```typescript
-   const config = useRuntimeConfig()
-   const clientId = config.public.unsplashAccessKey
-   const redirectUri = config.public.unsplashRedirectUri
-   ```
-
-6. **Update imports in components:**
-   - Change `../lib/unsplash` → `~/lib/unsplash`
-   - Change `../auth/unsplashAuth` → `~/auth/unsplashAuth`
-   - Change `../config/search-tags.json` → `~/config/search-tags.json`
-
-7. **Use in Nuxt pages/components:**
-   ```vue
-   <script setup>
-   const imageSrc = ref('https://images.unsplash.com/photo-1638368593249-7cadb261e8b3?q=80&w=700')
-   </script>
-
-   <template>
-     <ClientOnly>
-       <ImageReplacer v-model="imageSrc" />
-     </ClientOnly>
-   </template>
-   ```
-
-## 🔐 OAuth Backend Setup
-
-Unsplash's token exchange typically requires a backend due to CORS. Here's a minimal Node.js endpoint:
-
-**NOTE:** The backend requires your **Secret Key** from Unsplash (found under "Keys" in your app). Secret Key must NEVER be included in frontend code - only in backend environment variables.
-
-```javascript
-// server/api/unsplash-token.js (Nuxt example)
-export default defineEventHandler(async (event) => {
-  const { code, codeVerifier } = await readBody(event)
-
-  const response = await fetch('https://unsplash.com/oauth/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      client_id: process.env.UNSPLASH_ACCESS_KEY,
-      client_secret: process.env.UNSPLASH_SECRET_KEY,  // ⚠️ Backend only! Not in .env
-      redirect_uri: process.env.UNSPLASH_REDIRECT_URI,
-      code,
-      grant_type: 'authorization_code',
-      code_verifier: codeVerifier,
-    }),
-  })
-
-  return await response.json()
-})
-```
-
-**Backend environment variables (e.g., in `.env.server`):**
-```env
-UNSPLASH_ACCESS_KEY=your_access_key
-UNSPLASH_SECRET_KEY=your_secret_key
-UNSPLASH_REDIRECT_URI=http://localhost:3000/auth/callback
-```
-
-Update `unsplashAuth.ts` to call your backend:
-
-```typescript
-// In handleCallback()
-const response = await fetch('/api/unsplash-token', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    code,
-    codeVerifier: pkceState.codeVerifier,
-  }),
-})
-```
-
-## 🎨 Design Decisions
-
-- **Debounce:** 300ms balance between responsiveness and API calls
-- **Grid:** Min 140px cells, object-fit: cover for consistent display
-- **Transitions:** 150-200ms for smooth UX
-- **Image quality:** `urls.small` for thumbs, `urls.regular` for selected (balance between quality and load time)
-- **Accessibility:** ARIA roles, keyboard navigation (Enter/Space opens, ESC closes), focus trap in modal
-
-## 🧪 Testing
-
-Start in **dummy mode** and test:
-
-1. ✅ Hover shows overlay with icon
-2. ✅ Click opens modal with focus on input
-3. ✅ Grid shows 20 mock thumbs
-4. ✅ Click on thumb updates image and closes modal
-5. ✅ ESC and backdrop click close modal
-6. ✅ Chips populate input and trigger search
-
-Switch to **live mode** and test:
-
-1. ✅ Type "cat" (≥3 chars) → loading → results
-2. ✅ Select image → updated v-model
-3. ✅ No runtime errors in console
-
-## 📦 Build
+## 🔧 Development Commands
 
 ```bash
-npm run build
+npm install              # Install dependencies
+npm run dev             # Start Nuxt dev server (port 3000)
+npm run build           # Build for production
+npm run generate        # Generate static site
+npm run preview         # Preview production build
+npm run typecheck       # Run TypeScript type check
 ```
 
-Output in `dist/` folder.
+## 🌐 Environment Variables
+
+**Dummy Mode** (default - no API key needed):
+```env
+NUXT_PUBLIC_APP_DUMMY_MODE=true
+```
+
+**Live Mode** (requires Unsplash Access Key):
+```env
+NUXT_PUBLIC_APP_DUMMY_MODE=false
+NUXT_PUBLIC_UNSPLASH_ACCESS_KEY=your_access_key_here
+```
+
+**OAuth Mode** (higher rate limits):
+```env
+NUXT_PUBLIC_UNSPLASH_OAUTH_ENABLED=true
+NUXT_PUBLIC_UNSPLASH_REDIRECT_URI=http://localhost:3000/auth/callback
+```
+
+See [.env.example](.env.example) for full configuration.
+
+## 📚 Documentation
+
+- [CLAUDE.md](CLAUDE.md) - Detailed developer guide
+- [Project Structure](#-project-structure)
+- [Creating Modules](#-creating-new-modules)
+
+## 🗺️ Roadmap
+
+**Planned Components:**
+- Button component
+- Icon component
+- Card component
+
+**Planned Modules:**
+- Hero module (headline + CTA + background)
+- Gallery module (image grid)
+- Form module (contact forms)
+- Testimonial module
+- Pricing table module
+- FAQ accordion module
 
 ## 🛠️ Tech Stack
 
-- **Vue 3** (Composition API)
-- **Vite** (dev server & bundler)
-- **TypeScript** (type safety)
-- **unsplash-js** (Unsplash API client)
-- **Vanilla CSS** (no frameworks)
+- **Nuxt 4** - Vue 3 framework
+- **Vue 3** - Composition API
+- **TypeScript** - Strict mode
+- **unsplash-js** - Unsplash API client
+- **Vanilla CSS** - No frameworks
 
 ## 📄 License
 
@@ -329,4 +302,4 @@ MIT
 
 ---
 
-**Powered by [Unsplash](https://unsplash.com)**
+**Built with ❤️ using Nuxt 4 + Vue 3 + TypeScript**
