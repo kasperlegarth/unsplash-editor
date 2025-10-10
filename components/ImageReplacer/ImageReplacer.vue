@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { searchPhotos } from '~/lib/unsplash'
 import type { UnsplashPhoto } from '~/lib/unsplash'
 import { debounce } from '~/lib/debounce'
-import searchTagsConfig from '~/config/search-tags.json'
+import searchTagsConfig from './config.json'
 
 interface Props {
   modelValue: string
@@ -99,18 +99,6 @@ function handleKeydown(event: KeyboardEvent) {
   }
 }
 
-function handleBackdropClick(event: MouseEvent) {
-  if (event.target === event.currentTarget) {
-    closeModal()
-  }
-}
-
-function handleModalKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    closeModal()
-  }
-}
-
 function handleCustomUrl() {
   if (customUrl.value.trim()) {
     emit('update:modelValue', customUrl.value.trim())
@@ -157,131 +145,97 @@ function handleCustomUrlKeydown(event: KeyboardEvent) {
     </div>
 
     <!-- Modal -->
-    <Transition name="modal">
-      <div
-        v-if="isModalOpen"
-        class="modal-backdrop"
-        @click="handleBackdropClick"
-        @keydown="handleModalKeydown"
-      >
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-          <div class="modal-header">
-            <h2 id="modal-title" class="modal-title">Search Unsplash</h2>
-            <button
-              class="close-button"
-              aria-label="Close modal"
-              @click="closeModal"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          </div>
+    <Modal :isOpen="isModalOpen" title="Search Unsplash" @close="closeModal">
+      <!-- Custom URL input -->
+      <div class="custom-url-container">
+        <input
+          type="text"
+          class="custom-url-input"
+          placeholder="Paste image URL…"
+          v-model="customUrl"
+          @keydown="handleCustomUrlKeydown"
+        />
+        <svg
+          class="enter-icon"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          @click="handleCustomUrl"
+        >
+          <polyline points="9 10 4 15 9 20"></polyline>
+          <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
+        </svg>
+      </div>
 
-          <div class="modal-body">
-            <!-- Custom URL input -->
-            <div class="custom-url-container">
-              <input
-                type="text"
-                class="custom-url-input"
-                placeholder="Paste image URL…"
-                v-model="customUrl"
-                @keydown="handleCustomUrlKeydown"
-              />
-              <svg
-                class="enter-icon"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                @click="handleCustomUrl"
-              >
-                <polyline points="9 10 4 15 9 20"></polyline>
-                <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
-              </svg>
-            </div>
+      <!-- Search input -->
+      <input
+        type="text"
+        class="modal-search-input"
+        placeholder="Search Unsplash…"
+        :value="searchQuery"
+        @input="handleSearchInput"
+      />
 
-            <!-- Search input -->
-            <input
-              type="text"
-              class="modal-search-input"
-              placeholder="Search Unsplash…"
-              :value="searchQuery"
-              @input="handleSearchInput"
+      <!-- Chips -->
+      <div class="chips">
+        <button
+          v-for="chip in CHIPS"
+          :key="chip"
+          class="chip"
+          @click="handleChipClick(chip)"
+        >
+          {{ chip }}
+        </button>
+      </div>
+
+      <!-- Content area -->
+      <div class="content">
+        <!-- Idle state -->
+        <div v-if="!searchQuery && !isLoading && !error" class="state-message">
+          Type at least 3 characters…
+        </div>
+
+        <!-- Loading state -->
+        <div v-else-if="isLoading" class="state-message">
+          <div class="spinner"></div>
+          <p>Searching…</p>
+        </div>
+
+        <!-- Error state -->
+        <div v-else-if="error" class="state-message error">
+          {{ error }}
+        </div>
+
+        <!-- Empty state -->
+        <div
+          v-else-if="searchQuery.length >= 3 && searchResults.length === 0"
+          class="state-message"
+        >
+          No results for '{{ searchQuery }}'
+        </div>
+
+        <!-- Results grid -->
+        <div v-else-if="searchResults.length > 0" class="results-grid">
+          <button
+            v-for="photo in searchResults"
+            :key="photo.id"
+            class="result-item"
+            @click="selectPhoto(photo)"
+          >
+            <img
+              :src="photo.urls.small"
+              :alt="photo.alt_description || 'Unsplash photo'"
+              class="result-image"
             />
-
-            <!-- Chips -->
-            <div class="chips">
-              <button
-                v-for="chip in CHIPS"
-                :key="chip"
-                class="chip"
-                @click="handleChipClick(chip)"
-              >
-                {{ chip }}
-              </button>
-            </div>
-
-            <!-- Content area -->
-            <div class="content">
-              <!-- Idle state -->
-              <div v-if="!searchQuery && !isLoading && !error" class="state-message">
-                Type at least 3 characters…
-              </div>
-
-              <!-- Loading state -->
-              <div v-else-if="isLoading" class="state-message">
-                <div class="spinner"></div>
-                <p>Searching…</p>
-              </div>
-
-              <!-- Error state -->
-              <div v-else-if="error" class="state-message error">
-                {{ error }}
-              </div>
-
-              <!-- Empty state -->
-              <div
-                v-else-if="searchQuery.length >= 3 && searchResults.length === 0"
-                class="state-message"
-              >
-                No results for '{{ searchQuery }}'
-              </div>
-
-              <!-- Results grid -->
-              <div v-else-if="searchResults.length > 0" class="results-grid">
-                <button
-                  v-for="photo in searchResults"
-                  :key="photo.id"
-                  class="result-item"
-                  @click="selectPhoto(photo)"
-                >
-                  <img
-                    :src="photo.urls.small"
-                    :alt="photo.alt_description || 'Unsplash photo'"
-                    class="result-image"
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
+          </button>
         </div>
       </div>
-    </Transition>
+    </Modal>
   </div>
 </template>
 
@@ -348,72 +302,7 @@ $transition-normal: 200ms ease;
   color: white;
 }
 
-// Modal
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-}
-
-.modal {
-  background: white;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 900px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
-  border-bottom: 1px solid $border-color;
-}
-
-.modal-title {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: $gray-900;
-}
-
-.close-button {
-  background: none;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
-  color: $gray-500;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all $transition-fast;
-
-  &:hover {
-    background: $gray-100;
-    color: $gray-900;
-  }
-}
-
-.modal-body {
-  padding: 24px;
-  overflow-y: auto;
-  flex: 1;
-}
-
+// Modal content styles
 .custom-url-container {
   position: relative;
   margin-bottom: 16px;
@@ -550,25 +439,5 @@ $transition-normal: 200ms ease;
   height: 100%;
   object-fit: cover;
   display: block;
-}
-
-// Modal transitions
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity $transition-normal;
-
-  .modal {
-    transition: transform $transition-normal, opacity $transition-normal;
-  }
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-
-  .modal {
-    transform: scale(0.95);
-    opacity: 0;
-  }
 }
 </style>

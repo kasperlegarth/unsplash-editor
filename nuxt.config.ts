@@ -24,6 +24,17 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.scss'],
 
+  components: [
+    {
+      path: '~/components',
+      pathPrefix: false,
+    },
+    {
+      path: '~/modules',
+      pathPrefix: false,
+    }
+  ],
+
   app: {
     head: {
       title: 'Pagebuilder Tools',

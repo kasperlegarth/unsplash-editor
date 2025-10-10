@@ -2,16 +2,18 @@
 
 A modular pagebuilder toolkit with reusable Vue 3 components and configurable modules for building beautiful pages. Built with Nuxt 4, TypeScript, and designed to be framework-agnostic.
 
-**Version:** 0.3.0
+**Version:** 0.4.0
 
 ## ✨ Features
 
-- 🧩 **Modular Architecture**: Components + Modules system
+- 🧩 **Modular Architecture**: System Components + Feature Components + Modules
+- 🎭 **System Components**: Reusable UI elements (Modal, etc.)
 - 🎨 **Base Settings**: All modules share common settings (background, padding)
 - ⚙️ **Unique Settings**: Each module has tailored settings
 - 🖼️ **ImageReplacer**: Unsplash integration with dummy/live/OAuth modes
 - 📝 **Text Components**: Headline and Text with alignment and sizing
 - 🔧 **TextImage Module**: Combine text and images with flexible layouts
+- 🎨 **SCSS**: Modern styling with variables and nesting
 - ♿ **Accessible**: ARIA labels and keyboard navigation
 - 📱 **Responsive**: Mobile-first design
 - 🔒 **TypeScript**: Strict mode with full type safety
@@ -42,17 +44,28 @@ Open [http://localhost:3000](http://localhost:3000) to see the demo.
 
 ## 📐 Architecture
 
-### Components vs Modules
+### Three-Tier Component System
 
-**Components** (`/components`) are small, focused UI elements:
-- **ImageReplacer**: Unsplash image picker
-- **Headline**: h1-h6 with alignment
-- **Text**: Content with size and alignment
+**System Components** (`/components/system`) are generic UI elements:
+- **Modal**: Reusable modal with slots for custom content
+- Future: Button, Input, Card, etc.
+
+**Feature Components** (`/components/[Name]`) are focused functionality units:
+- **ImageReplacer/**: Unsplash image picker with config
+- **Headline/**: h1-h6 with alignment
+- **Text/**: Content with size and alignment
+
+Each feature component lives in its own folder with related files:
+```
+/components/ImageReplacer/
+  ImageReplacer.vue
+  config.json        # Search tags configuration
+```
 
 **Modules** (`/modules`) combine components with settings:
 - **All modules** inherit base settings (backgroundColor, padding)
 - **Each module** adds unique settings (e.g., imagePosition)
-- **TextImage**: Headline + Text + Image with layout control
+- **TextImage**: Headline + Text + ImageReplacer with layout control
 
 ### Example: TextImage Module
 
@@ -85,9 +98,15 @@ Open [http://localhost:3000](http://localhost:3000) to see the demo.
 
 ```
 /components
-  ImageReplacer.vue    # Unsplash picker with v-model
-  Headline.vue         # Configurable headline (h1-h6)
-  Text.vue            # Text content with styling
+  /system              # Generic UI components
+    Modal.vue          # Reusable modal
+  /ImageReplacer       # Feature component
+    ImageReplacer.vue
+    config.json        # Search tags
+  /Headline            # Feature component
+    Headline.vue
+  /Text                # Feature component
+    Text.vue
 
 /modules
   /TextImage
@@ -101,8 +120,8 @@ Open [http://localhost:3000](http://localhost:3000) to see the demo.
   unsplash.ts         # Unsplash API wrapper (dummy/live/OAuth)
   debounce.ts         # Debounce utility
 
-/config
-  search-tags.json    # Default Unsplash search tags
+/assets/css
+  main.scss           # Global SCSS styles
 
 /pages
   index.vue           # Demo page

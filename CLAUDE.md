@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **pagebuilder-tools** er et modulært pagebuilder toolkit med genbrugelige komponenter og konfigurer bare moduler til at bygge smukke sider. Projektet er bygget med Nuxt 4 og TypeScript.
 
-**Version:** 0.3.0
+**Version:** 0.4.0
 
 ## Development Commands
 
@@ -24,33 +24,51 @@ npm run typecheck       # Run TypeScript type check
 ### Nuxt 4 Project Structure
 
 ```
-/components       # Genbrugelige UI komponenter (ImageReplacer, Headline, Text)
-/modules          # Moduler med egne indstillinger (TextImage)
+/components             # Alle komponenter
+  /system               # System UI komponenter (Modal, Button, etc.)
+    /Modal.vue          # Genbrugelig modal komponent
+  /ComponentName        # Feature komponenter
+    /ComponentName.vue  # Komponent fil
+    /config.json        # Komponent-specifik config
+    /types.ts           # Komponent-specifik types (optional)
+/modules                # Moduler med egne indstillinger
   /ModuleName
-    /ModuleName.vue   # Modul komponent
-    /types.ts         # Modul-specifikke types
-/types            # Global types (module base settings)
-  /modules.ts     # BaseModuleSettings interface
-/lib              # Utility libraries (unsplash, debounce)
-/auth             # Authentication helpers (OAuth)
-/config           # Configuration filer (search-tags.json)
-/assets/css       # Global styles
-/pages            # Nuxt pages (index.vue demo)
-nuxt.config.ts    # Nuxt konfiguration
+    /ModuleName.vue     # Modul komponent
+    /types.ts           # Modul-specifikke types
+/types                  # Global types
+  /modules.ts           # BaseModuleSettings interface
+/lib                    # Utility libraries (unsplash, debounce)
+/auth                   # Authentication helpers (OAuth)
+/assets/css             # Global SCSS styles
+/pages                  # Nuxt pages (index.vue demo)
+nuxt.config.ts          # Nuxt konfiguration
 ```
 
 ### Modular Architecture
 
-Projektet følger en **component + module** arkitektur:
+Projektet følger en **system components + feature components + modules** arkitektur:
 
-#### **Components** (`/components`)
-Små, genbrugelige UI-dele med fokus på én funktionalitet:
-- **ImageReplacer**: Unsplash image picker med v-model
-- **Headline**: Konfigurerbar overskrift (h1-h6, alignment)
-- **Text**: Tekst komponent med size og alignment
+#### **System Components** (`/components/system`)
+Generiske, genbrugelige UI-elementer der bruges på tværs af projektet:
+- **Modal**: Genbrugelig modal med slots til indhold
+- Fremtidige: Button, Input, Card, etc.
 
-Komponenter er:
+System komponenter:
+- **Framework-agnostiske**: Ingen forretningslogik
+- **Slot-baserede**: Maksimal fleksibilitet
+- **Konsistente**: Ensartet UI på tværs af projektet
+
+#### **Feature Components** (`/components/[ComponentName]`)
+Komponenter med specifik funktionalitet, organiseret i egne mapper:
+- **ImageReplacer/**: Unsplash image picker med v-model
+  - `ImageReplacer.vue`: Komponent
+  - `config.json`: Search tags konfiguration
+- **Headline/**: Konfigurerbar overskrift (h1-h6, alignment)
+- **Text/**: Tekst komponent med size og alignment
+
+Feature komponenter:
 - **Selvstændige**: Minimal eksterne dependencies
+- **Kapslet**: Alt relateret i én mappe
 - **Konfigurerbare**: Props til customization
 - **Accessible**: ARIA, keyboard navigation
 - **Type-safe**: TypeScript strict mode
@@ -89,7 +107,37 @@ export interface TextImageSettings extends BaseModuleSettings {
 
 ## Key Components
 
-### ImageReplacer (`components/ImageReplacer.vue`)
+### System Components
+
+#### Modal (`components/system/Modal.vue`)
+
+Genbrugelig modal komponent med slot support.
+
+**Props:**
+```typescript
+interface Props {
+  isOpen: boolean
+  title?: string  // Optional modal title
+}
+```
+
+**Events:**
+- `@close`: Emitted når modal lukkes (ESC, backdrop click, close button)
+
+**Slots:**
+- `default`: Modal body content
+- `header`: Custom header (hvis title ikke bruges)
+
+**Usage:**
+```vue
+<Modal :isOpen="isOpen" title="My Title" @close="handleClose">
+  <p>Modal content goes here</p>
+</Modal>
+```
+
+### Feature Components
+
+#### ImageReplacer (`components/ImageReplacer/ImageReplacer.vue`)
 
 Unsplash image picker med tre operation modes:
 
@@ -106,7 +154,15 @@ interface Props {
 }
 ```
 
-### Headline (`components/Headline.vue`)
+**Configuration:**
+Search tags defineret i `components/ImageReplacer/config.json`:
+```json
+{
+  "tags": ["Food", "Sport", "Animals", ...]
+}
+```
+
+#### Headline (`components/Headline/Headline.vue`)
 
 **Props:**
 ```typescript
@@ -117,7 +173,7 @@ interface Props {
 }
 ```
 
-### Text (`components/Text.vue`)
+#### Text (`components/Text/Text.vue`)
 
 **Props:**
 ```typescript
@@ -167,6 +223,43 @@ interface TextImageSettings extends BaseModuleSettings {
 />
 ```
 
+## Creating New Components
+
+### Creating a System Component
+
+1. **Opret komponent** i `/components/system/YourComponent.vue`
+2. **Fokus på genbrugelighed**: Ingen forretningslogik, brug slots
+3. **Props interface**: Minimal, fokuseret API
+4. **Example**:
+   ```vue
+   <script setup lang="ts">
+   interface Props {
+     variant?: 'primary' | 'secondary'
+   }
+   defineProps<Props>()
+   </script>
+
+   <template>
+     <div class="your-component">
+       <slot></slot>
+     </div>
+   </template>
+   ```
+
+### Creating a Feature Component
+
+1. **Opret mappe**: `/components/YourComponent/`
+2. **Opret komponent**: `YourComponent.vue`
+3. **Tilføj config** (hvis nødvendigt): `config.json`
+4. **Tilføj types** (hvis nødvendigt): `types.ts`
+5. **Structure**:
+   ```
+   /components/YourComponent/
+     YourComponent.vue
+     config.json      # Optional
+     types.ts         # Optional
+   ```
+
 ## Creating New Modules
 
 For at oprette et nyt modul:
@@ -195,7 +288,7 @@ For at oprette et nyt modul:
    </script>
    ```
 
-4. **Brug komponenter**: Import og brug eksisterende komponenter (Headline, Text, etc.)
+4. **Brug komponenter**: Brug eksisterende feature komponenter (Headline, Text, ImageReplacer) og system komponenter (Modal)
 
 ## Environment Variables
 
