@@ -285,7 +285,21 @@ function handleCustomUrlKeydown(event: KeyboardEvent) {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+// Variables
+$primary-color: #3b82f6;
+$border-color: #e5e7eb;
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-300: #d1d5db;
+$gray-500: #6b7280;
+$gray-600: #374151;
+$gray-900: #111827;
+$error-color: #dc2626;
+$transition-fast: 150ms ease;
+$transition-normal: 200ms ease;
+
 .image-replacer {
   width: 100%;
 }
@@ -299,10 +313,15 @@ function handleCustomUrlKeydown(event: KeyboardEvent) {
   border-radius: 8px;
   overflow: hidden;
   outline: none;
-}
 
-.image-container:focus-visible {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.5);
+  }
+
+  &:hover .overlay,
+  &:focus .overlay {
+    opacity: 1;
+  }
 }
 
 .main-image {
@@ -322,19 +341,14 @@ function handleCustomUrlKeydown(event: KeyboardEvent) {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 150ms ease;
-}
-
-.image-container:hover .overlay,
-.image-container:focus .overlay {
-  opacity: 1;
+  transition: opacity $transition-fast;
 }
 
 .replace-icon {
   color: white;
 }
 
-/* Modal */
+// Modal
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -366,14 +380,14 @@ function handleCustomUrlKeydown(event: KeyboardEvent) {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid $border-color;
 }
 
 .modal-title {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #111827;
+  color: $gray-900;
 }
 
 .close-button {
@@ -381,17 +395,17 @@ function handleCustomUrlKeydown(event: KeyboardEvent) {
   border: none;
   padding: 8px;
   cursor: pointer;
-  color: #6b7280;
+  color: $gray-500;
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 150ms ease;
-}
+  transition: all $transition-fast;
 
-.close-button:hover {
-  background: #f3f4f6;
-  color: #111827;
+  &:hover {
+    background: $gray-100;
+    color: $gray-900;
+  }
 }
 
 .modal-body {
@@ -408,15 +422,15 @@ function handleCustomUrlKeydown(event: KeyboardEvent) {
 .custom-url-input {
   width: 100%;
   padding: 12px 48px 12px 16px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid $border-color;
   border-radius: 8px;
   font-size: 1rem;
   outline: none;
-  transition: border-color 150ms ease;
-}
+  transition: border-color $transition-fast;
 
-.custom-url-input:focus {
-  border-color: #3b82f6;
+  &:focus {
+    border-color: $primary-color;
+  }
 }
 
 .enter-icon {
@@ -426,25 +440,25 @@ function handleCustomUrlKeydown(event: KeyboardEvent) {
   transform: translateY(-50%);
   color: #9ca3af;
   cursor: pointer;
-  transition: color 150ms ease;
-}
+  transition: color $transition-fast;
 
-.enter-icon:hover {
-  color: #3b82f6;
+  &:hover {
+    color: $primary-color;
+  }
 }
 
 .modal-search-input {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid $border-color;
   border-radius: 8px;
   font-size: 1rem;
   outline: none;
-  transition: border-color 150ms ease;
-}
+  transition: border-color $transition-fast;
 
-.modal-search-input:focus {
-  border-color: #3b82f6;
+  &:focus {
+    border-color: $primary-color;
+  }
 }
 
 .chips {
@@ -455,22 +469,22 @@ function handleCustomUrlKeydown(event: KeyboardEvent) {
 
 .chip {
   padding: 8px 16px;
-  background: #f3f4f6;
+  background: $gray-100;
   border: none;
   border-radius: 20px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: $gray-600;
   cursor: pointer;
-  transition: all 150ms ease;
-}
+  transition: all $transition-fast;
 
-.chip:hover {
-  background: #e5e7eb;
-}
+  &:hover {
+    background: $gray-200;
+  }
 
-.chip:active {
-  background: #d1d5db;
+  &:active {
+    background: $gray-300;
+  }
 }
 
 .content {
@@ -484,19 +498,19 @@ function handleCustomUrlKeydown(event: KeyboardEvent) {
   align-items: center;
   justify-content: center;
   min-height: 300px;
-  color: #6b7280;
+  color: $gray-500;
   font-size: 1rem;
-}
 
-.state-message.error {
-  color: #dc2626;
+  &.error {
+    color: $error-color;
+  }
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #3b82f6;
+  border: 3px solid $border-color;
+  border-top-color: $primary-color;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin-bottom: 12px;
@@ -521,14 +535,14 @@ function handleCustomUrlKeydown(event: KeyboardEvent) {
   cursor: pointer;
   border-radius: 8px;
   overflow: hidden;
-  background: #f3f4f6;
-  transition: transform 150ms ease, box-shadow 150ms ease;
-}
+  background: $gray-100;
+  transition: transform $transition-fast, box-shadow $transition-fast;
 
-.result-item:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
 }
 
 .result-image {
@@ -538,25 +552,23 @@ function handleCustomUrlKeydown(event: KeyboardEvent) {
   display: block;
 }
 
-/* Modal transitions */
+// Modal transitions
 .modal-enter-active,
 .modal-leave-active {
-  transition: opacity 200ms ease;
-}
+  transition: opacity $transition-normal;
 
-.modal-enter-active .modal,
-.modal-leave-active .modal {
-  transition: transform 200ms ease, opacity 200ms ease;
+  .modal {
+    transition: transform $transition-normal, opacity $transition-normal;
+  }
 }
 
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
-}
 
-.modal-enter-from .modal,
-.modal-leave-to .modal {
-  transform: scale(0.95);
-  opacity: 0;
+  .modal {
+    transform: scale(0.95);
+    opacity: 0;
+  }
 }
 </style>

@@ -20,61 +20,42 @@ const tag = computed(() => `h${props.level}`)
   </component>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+// Variables
+$text-color: #111827;
+$breakpoint-tablet: 768px;
+
 .headline {
   margin: 0;
   font-weight: 700;
   line-height: 1.2;
-  color: #111827;
+  color: $text-color;
 }
 
-h1.headline {
-  font-size: 3rem;
-}
+// Heading sizes using SCSS
+@each $level, $size, $mobile-size in
+  (1, 3rem, 2.25rem),
+  (2, 2.25rem, 1.875rem),
+  (3, 1.875rem, 1.5rem),
+  (4, 1.5rem, 1.5rem),
+  (5, 1.25rem, 1.25rem),
+  (6, 1rem, 1rem)
+{
+  h#{$level}.headline {
+    font-size: $size;
 
-h2.headline {
-  font-size: 2.25rem;
-}
-
-h3.headline {
-  font-size: 1.875rem;
-}
-
-h4.headline {
-  font-size: 1.5rem;
-}
-
-h5.headline {
-  font-size: 1.25rem;
-}
-
-h6.headline {
-  font-size: 1rem;
-}
-
-.align-left {
-  text-align: left;
-}
-
-.align-center {
-  text-align: center;
-}
-
-.align-right {
-  text-align: right;
-}
-
-@media (max-width: 768px) {
-  h1.headline {
-    font-size: 2.25rem;
+    @if $level <= 3 {
+      @media (max-width: $breakpoint-tablet) {
+        font-size: $mobile-size;
+      }
+    }
   }
+}
 
-  h2.headline {
-    font-size: 1.875rem;
-  }
-
-  h3.headline {
-    font-size: 1.5rem;
+// Text alignment
+@each $align in left, center, right {
+  .align-#{$align} {
+    text-align: $align;
   }
 }
 </style>

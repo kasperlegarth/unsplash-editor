@@ -83,13 +83,17 @@ const textColor = computed(() => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+// Variables
+$container-max-width: 1200px;
+$breakpoint-tablet: 768px;
+
 .text-image-module {
   width: 100%;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: $container-max-width;
   margin: 0 auto;
   padding: 0 1.5rem;
 }
@@ -99,24 +103,43 @@ const textColor = computed(() => {
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
   align-items: center;
-}
 
-/* Default: Image right */
-.content-wrapper .text-content {
-  order: 1;
-}
+  // Default: Image right
+  .text-content {
+    order: 1;
+  }
 
-.content-wrapper .image-content {
-  order: 2;
-}
+  .image-content {
+    order: 2;
+  }
 
-/* Image left variant */
-.content-wrapper.image-left .text-content {
-  order: 2;
-}
+  // Image left variant
+  &.image-left {
+    .text-content {
+      order: 2;
+    }
 
-.content-wrapper.image-left .image-content {
-  order: 1;
+    .image-content {
+      order: 1;
+    }
+  }
+
+  // Responsive
+  @media (max-width: $breakpoint-tablet) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+
+    // Stack on mobile: always text first, then image
+    .text-content,
+    &.image-left .text-content {
+      order: 1;
+    }
+
+    .image-content,
+    &.image-left .image-content {
+      order: 2;
+    }
+  }
 }
 
 .text-content {
@@ -134,23 +157,5 @@ const textColor = computed(() => {
   height: auto;
   border-radius: 8px;
   display: block;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .content-wrapper {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-
-  .content-wrapper .text-content,
-  .content-wrapper.image-left .text-content {
-    order: 1;
-  }
-
-  .content-wrapper .image-content,
-  .content-wrapper.image-left .image-content {
-    order: 2;
-  }
 }
 </style>

@@ -109,16 +109,26 @@ useHead({
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+// Variables
+$primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-500: #6b7280;
+$gray-600: #374151;
+$gray-900: #111827;
+$primary-color: #667eea;
+$breakpoint-mobile: 640px;
+
 .demo-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-/* Hero Section */
+// Hero Section
 .hero {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: $primary-gradient;
   color: white;
   padding: 4rem 1.5rem;
   text-align: center;
@@ -130,18 +140,16 @@ useHead({
 }
 
 .hero-title {
-  margin: 0;
+  margin: 0 0 1rem;
   font-size: 3.5rem;
   font-weight: 700;
-  margin-bottom: 1rem;
 }
 
 .hero-subtitle {
-  margin: 0;
+  margin: 0 0 2rem;
   font-size: 1.25rem;
   opacity: 0.95;
   line-height: 1.6;
-  margin-bottom: 2rem;
 }
 
 .hero-badges {
@@ -160,14 +168,14 @@ useHead({
   backdrop-filter: blur(10px);
 }
 
-/* Demo Modules */
+// Demo Modules
 .demo-modules {
   flex: 1;
 }
 
-/* Component Showcase */
+// Component Showcase
 .component-showcase {
-  background: #f9fafb;
+  background: $gray-50;
   padding: 4rem 1.5rem;
 }
 
@@ -180,7 +188,7 @@ useHead({
   margin: 0 0 2rem 0;
   font-size: 2rem;
   font-weight: 700;
-  color: #111827;
+  color: $gray-900;
   text-align: center;
 }
 
@@ -196,36 +204,36 @@ useHead({
   border-radius: 12px;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   transition: transform 150ms ease, box-shadow 150ms ease;
-}
 
-.component-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
 
-.component-card h3 {
-  margin: 0 0 0.75rem 0;
-  font-size: 1.25rem;
-  color: #111827;
-}
+  h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.25rem;
+    color: $gray-900;
+  }
 
-.component-card p {
-  margin: 0 0 1rem 0;
-  color: #6b7280;
-  line-height: 1.6;
-}
+  p {
+    margin: 0 0 1rem 0;
+    color: $gray-500;
+    line-height: 1.6;
+  }
 
-.component-card code {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  background: #f3f4f6;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  color: #374151;
+  code {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: $gray-100;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: $gray-600;
+  }
 }
 
 .module-card {
-  border-left: 4px solid #667eea;
+  border-left: 4px solid $primary-color;
 }
 
 .module-settings {
@@ -238,20 +246,20 @@ useHead({
   line-height: 1.6;
 }
 
-/* Footer */
+// Footer
 .demo-footer {
-  background: #111827;
+  background: $gray-900;
   color: #9ca3af;
   padding: 2rem 1.5rem;
   text-align: center;
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
 }
 
-.demo-footer p {
-  margin: 0;
-  font-size: 0.875rem;
-}
-
-/* Responsive */
+// Responsive
 @media (max-width: 768px) {
   .hero-title {
     font-size: 2.5rem;

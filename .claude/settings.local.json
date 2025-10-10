@@ -23,7 +23,10 @@
       "Bash(git push:*)",
       "Bash(git remote set-url:*)",
       "Bash(git branch:*)",
-      "Bash(npm run typecheck:*)"
+      "Bash(npm run typecheck:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(awk:*)"
     ],
     "deny": [],
     "ask": []

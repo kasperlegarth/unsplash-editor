@@ -17,34 +17,37 @@ withDefaults(defineProps<Props>(), {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+// Variables
+$text-color: #374151;
+
+// Size mapping
+$sizes: (
+  small: 0.875rem,
+  normal: 1rem,
+  large: 1.125rem
+);
+
+// Alignment values
+$alignments: (left, center, right);
+
 .text-content {
   margin: 0;
   line-height: 1.75;
-  color: #374151;
+  color: $text-color;
 }
 
-.size-small {
-  font-size: 0.875rem;
+// Generate size classes
+@each $name, $size in $sizes {
+  .size-#{$name} {
+    font-size: $size;
+  }
 }
 
-.size-normal {
-  font-size: 1rem;
-}
-
-.size-large {
-  font-size: 1.125rem;
-}
-
-.align-left {
-  text-align: left;
-}
-
-.align-center {
-  text-align: center;
-}
-
-.align-right {
-  text-align: right;
+// Generate alignment classes
+@each $align in $alignments {
+  .align-#{$align} {
+    text-align: $align;
+  }
 }
 </style>

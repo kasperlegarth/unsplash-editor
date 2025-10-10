@@ -22,7 +22,7 @@ export default defineNuxtConfig({
     typeCheck: true,
   },
 
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/main.scss'],
 
   app: {
     head: {
